@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>화면</title>
+<style>
+:root{--bg:#e7e8ec;--ink:#1b1c20;--mute:#6b6e78;--panel:#f6f6f8;--line:#c9cbd3;--acc:#2f6fed;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161a;--ink:#ececf0;--mute:#9a9da8;--panel:#202228;--line:#33363f;--acc:#6b9bff}}
+:root[data-theme="dark"]{--bg:#15161a;--ink:#ececf0;--mute:#9a9da8;--panel:#202228;--line:#33363f;--acc:#6b9bff}
+body{touch-action:manipulation}
+.screen{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);gap:12px;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-weight:600}
+nav{display:flex;gap:8px;align-items:center}
+button,.file{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc)}
+.ctrl{display:flex;gap:12px;flex-wrap:wrap;padding:12px 20px;align-items:end;border-bottom:1px solid var(--line)}
+.grp{display:flex;gap:8px;flex-wrap:wrap}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mute)}
+input[type=text]{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:130px}
+.file input{display:none}
+.slide{display:none;padding:20px 20px 36px}
+.slide.on{display:block}
+.stage{display:flex;justify-content:center}
+.fit{position:relative}
+.scale{position:absolute;left:0;top:0;transform-origin:0 0}
+.shoot .stage{position:fixed;inset:0;z-index:50;background:#000;align-items:center}
+.shoot .screen{border-radius:0}
+.exit{display:none}
+.shoot .exit{display:block;position:fixed;left:0;top:0;width:56px;height:56px;z-index:60;opacity:0;padding:0;border:0}
+.shoot header,.shoot .ctrl,.shoot .note{display:none}
+.note{max-width:640px;margin:18px auto 0;font-size:13px;color:var(--mute);line-height:1.6;text-align:center}
+.ph{text-align:center;color:var(--mute);padding:120px 0}
+/* 390x844pt screen. 위치·크기는 실제 캡처(393x852pt)를 3px=1pt로 환산, 아래쪽 기준 */
+.screen{width:390px;height:844px;border-radius:47px;overflow:hidden;position:relative;color:#fff;background:#0c0f18}
+.wall{display:block;position:absolute;inset:-40px;background-size:cover;background-position:center;filter:blur(24px)}
+.noblur .wall{inset:0;filter:none}
+[data-dev="13"] .wall{background-color:#1a1742;background-image:radial-gradient(55% 38% at 28% 28%,#ff6fb0 0%,transparent 70%),radial-gradient(60% 42% at 74% 62%,#3d6bff 0%,transparent 70%),radial-gradient(50% 30% at 30% 85%,#8a4bff 0%,transparent 70%)}
+[data-dev="13pro"] .wall{background-color:#16293b;background-image:linear-gradient(112deg,transparent 28%,rgba(150,200,240,.6) 44%,transparent 58%),linear-gradient(102deg,transparent 46%,rgba(200,230,250,.4) 56%,transparent 70%),linear-gradient(#2a4b66,#0e1a28)}
+.screen::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.34);z-index:1}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:162px;height:31px;background:#000;border-radius:0 0 20px 20px;z-index:5}
+.status{position:absolute;top:14px;left:0;right:0;height:20px;z-index:4;font-size:15px;font-weight:600}
+.status .t{position:absolute;left:36px;top:0}
+.status .r{position:absolute;right:26px;top:2px;display:flex;gap:5px;align-items:center}
+.bars{display:flex;gap:1.5px;align-items:flex-end;height:11px}.bars i{width:3px;background:#fff;border-radius:1px}
+.net{font-size:12px;font-weight:700}
+.batt{width:24px;height:11px;border:1px solid rgba(255,255,255,.45);border-radius:3.5px;padding:1px;position:relative}
+.batt::after{content:"";position:absolute;right:-3px;top:3px;width:1.5px;height:4px;background:rgba(255,255,255,.45);border-radius:0 1px 1px 0}
+.batt b{display:block;height:100%;width:80%;background:#fff;border-radius:2px}
+.who{position:absolute;top:112px;left:0;right:0;text-align:center;z-index:3;padding:0 24px}
+.who .n{font-size:34px;font-weight:600;line-height:40px;letter-spacing:-.2px}
+.who .s{font-size:16px;opacity:.9;margin-top:6px}
+.who .s:empty{display:none}
+[data-state="call"] .who{top:138px}
+.timer{display:none;position:absolute;top:110px;left:0;right:0;text-align:center;z-index:3;font-size:22px;font-weight:600;line-height:26px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
+.c{display:flex;flex-direction:column;align-items:center;font-size:14px;white-space:nowrap}
+.dot{border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.38)}
+.dot svg{fill:#fff}
+/* 수신: 메시지 보내기 / 음성 사서함 (원 지름 44, 중심 y=600, 가로 20%/80%) */
+.mini{position:absolute;left:0;right:0;top:578px;height:80px;z-index:3}
+.mini .c{position:absolute;top:0;width:130px;gap:7px}
+.mini .c:nth-child(1){left:calc(20% - 65px)}.mini .c:nth-child(2){left:calc(80% - 65px)}
+.mini .dot{width:44px;height:44px}.mini .dot svg{width:22px;height:22px}.mini .c:nth-child(2) svg{width:30px;height:30px}
+/* 버튼형(캡처 없음, 추정) */
+.big{position:absolute;left:0;right:0;top:690px;height:110px;z-index:3}
+.big .c{position:absolute;top:0;width:100px;gap:10px}
+.big .c:nth-child(1){left:calc(20% - 50px)}.big .c:nth-child(2){left:calc(80% - 50px);cursor:pointer}
+.big .dot{width:78px;height:78px;border:0}.big svg{width:34px;height:34px}
+.red{background:#ff3b30}.grn{background:#34c759}
+.dec svg{transform:rotate(135deg)}
+/* 밀어서 통화하기: 폭 322, 높이 90, 중심 y=729, 안쪽 흰 원 78 */
+.slider{position:absolute;left:34px;right:34px;top:684px;height:90px;border-radius:45px;background:rgba(255,255,255,.2);border:1.5px solid rgba(160,200,230,.55);display:none;align-items:center;z-index:3}
+.slider .k{touch-action:none;cursor:grab;position:relative;z-index:2;width:78px;height:78px;margin-left:4.5px;border-radius:50%;background:#f4fefd;display:grid;place-items:center}
+.slider .k svg{width:36px;height:36px;fill:#62c56d}
+.slider span{flex:1;text-align:center;font-size:21px;padding-right:12px;background:linear-gradient(90deg,rgba(255,255,255,.4) 0%,rgba(255,255,255,.8) 50%,rgba(255,255,255,.4) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:sh 2.2s linear infinite}
+@keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.slider span{animation:none}}
+[data-mode="slide"] .slider{display:flex}
+[data-mode="slide"] .big{display:none}
+/* 통화 중: 원 지름 78, 가로 20/50/80%, 세로 중심 604 / 729 */
+.grid{display:none;position:absolute;left:39px;width:312px;top:565px;grid-template-columns:repeat(3,78px);column-gap:39px;row-gap:20px;z-index:3}
+.gb{display:flex;flex-direction:column;align-items:center;gap:9px;font-size:14px;height:105px;white-space:nowrap}
+.gb .dot{width:78px;height:78px}.gb svg{width:36px;height:36px}
+.gb .redd{background:#c72d22;border-color:rgba(255,150,140,.65)}
+.gb svg.rot{transform:rotate(135deg);width:34px;height:34px}
+#endc{cursor:pointer}
+.home{display:none;position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:140px;height:5px;border-radius:3px;background:rgba(255,255,255,.75);z-index:4}
+[data-state="call"] .who .s,[data-state="call"] .mini,[data-state="call"] .big,[data-state="call"] .slider{display:none}
+[data-state="call"] .timer{display:block}
+[data-state="call"] .grid{display:grid}
+[data-state="call"] .home{display:block}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="ph" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></defs></svg>
+<header>
+<h1>소품 화면</h1>
+<nav><button id="prev">이전</button><span id="pg" style="font-size:13px;color:var(--mute)">1 / 2</span><button id="next">다음</button></nav>
+</header>
+
+<section class="slide on" id="s1">
+<div class="ctrl">
+<div class="grp"><button id="d13" aria-pressed="true">iPhone 13</button><button id="d13pro" aria-pressed="false">iPhone 13 Pro</button></div>
+<div class="grp"><button id="bRing" aria-pressed="true">수신 화면</button><button id="bCall" aria-pressed="false">통화 중 화면</button></div>
+<div class="grp"><button id="mBtn" aria-pressed="false">버튼형</button><button id="mSlide" aria-pressed="true">밀어서 통화하기</button></div>
+<label>발신자 이름<input type="text" id="inName" value="이윤지 05"></label>
+<label>보조 문구<input type="text" id="inSub" value=""></label>
+<label>시간<input type="text" id="inTime" value="1:57"></label>
+<label>통신<input type="text" id="inNet" value="5G"></label>
+<label class="file" style="color:var(--ink)">배경 이미지 올리기<input type="file" id="inImg" accept="image/*"></label>
+<button id="bBlur" aria-pressed="true">배경 블러</button>
+<button id="bShoot">촬영 모드</button>
+</div>
+<div class="stage" id="stage">
+<button class="exit" id="exit" aria-label="촬영 모드 종료"></button>
+<div class="fit" id="fit"><div class="scale" id="scale">
+<div class="screen" id="scr" data-dev="13" data-mode="slide" data-state="ring">
+<div class="wall" id="wall"></div>
+<div class="notch"></div>
+<div class="status"><span class="t">1:57</span><span class="r"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="net">5G</span><span class="batt"><b></b></span></span></div>
+<div class="who"><div class="n">이윤지 05</div><div class="s"></div></div>
+<div class="mini">
+<div class="c"><div class="dot"><svg viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.4 1.32 4.55 3.4 6.02L4 21l4.2-1.97c1.14.3 2.37.47 3.8.47 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg></div>메시지 보내기</div>
+<div class="c"><div class="dot"><svg viewBox="0 0 24 24"><path d="M18.5 6C15.46 6 13 8.46 13 11.5c0 1.33.47 2.55 1.26 3.5H9.74c.79-.95 1.26-2.17 1.26-3.5C11 8.46 8.54 6 5.5 6S0 8.46 0 11.5 2.46 17 5.5 17h13c3.04 0 5.5-2.46 5.5-5.5S21.54 6 18.5 6zm-13 9C3.57 15 2 13.43 2 11.5S3.57 8 5.5 8 9 9.57 9 11.5 7.43 15 5.5 15zm13 0c-1.93 0-3.5-1.57-3.5-3.5S16.57 8 18.5 8 22 9.57 22 11.5 20.43 15 18.5 15z"/></svg></div>음성 사서함</div>
+</div>
+<div class="big">
+<div class="c dec"><div class="dot red"><svg viewBox="0 0 24 24"><use href="#ph"/></svg></div><span style="margin-top:0">거절</span></div>
+<div class="c"><div class="dot grn"><svg viewBox="0 0 24 24"><use href="#ph"/></svg></div>수락</div>
+</div>
+<div class="slider"><div class="k"><svg viewBox="0 0 24 24"><use href="#ph"/></svg></div><span>밀어서 통화하기</span></div>
+<div class="timer" id="timer">00:00</div>
+<div class="grid"><div class="gb"><div class="dot "><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></div>스피커</div><div class="gb"><div class="dot "><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></div>FaceTime</div><div class="gb"><div class="dot "><svg viewBox="0 0 24 24"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/></svg></div>소리 끔</div><div class="gb"><div class="dot "><svg viewBox="0 0 24 24"><circle cx="4.5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19.5" cy="12" r="2"/></svg></div>더 보기</div><div class="gb" id="endc"><div class="dot redd"><svg viewBox="0 0 24 24" class="rot"><use href="#ph"/></svg></div>종료</div><div class="gb"><div class="dot "><svg viewBox="0 0 24 24"><circle cx="5.5" cy="3.5" r="1.9"/><circle cx="12" cy="3.5" r="1.9"/><circle cx="18.5" cy="3.5" r="1.9"/><circle cx="5.5" cy="9.5" r="1.9"/><circle cx="12" cy="9.5" r="1.9"/><circle cx="18.5" cy="9.5" r="1.9"/><circle cx="5.5" cy="15.5" r="1.9"/><circle cx="12" cy="15.5" r="1.9"/><circle cx="18.5" cy="15.5" r="1.9"/><circle cx="5.5" cy="21.5" r="1.9"/><circle cx="12" cy="21.5" r="1.9"/><circle cx="18.5" cy="21.5" r="1.9"/></svg></div>키패드</div></div>
+<div class="home"></div>
+</div></div></div>
+</div>
+<p class="note">위치와 크기는 실제 통화 캡처(1179×2556px = 393×852pt)에서 측정해 아이폰 13(390×844pt)에 맞췄습니다. 촬영 모드 종료: 왼쪽 위 모서리 탭 또는 Esc.</p>
+</section>
+
+<section class="slide" id="s2"><div class="ph">슬라이드 2: 다음 화면 (미정)</div></section>
+
+<script>
+const W=390,H=844;let K=1;
+const $=id=>document.getElementById(id),scr=$('scr'),root=document.body;
+function fit(){
+  const shoot=root.classList.contains('shoot');
+  K=shoot?Math.min(innerWidth/W,innerHeight/H):Math.max(.35,Math.min(1,(innerWidth-40)/W,(innerHeight-250)/H));
+  $('fit').style.width=W*K+'px';$('fit').style.height=H*K+'px';$('scale').style.transform='scale('+K+')';
+}
+addEventListener('resize',fit);
+function bind(id,sel){$(id).addEventListener('input',e=>scr.querySelector(sel).textContent=e.target.value)}
+bind('inName','.who .n');bind('inSub','.who .s');bind('inTime','.status .t');bind('inNet','.net');
+function pick(a,b,fn){[a,b].forEach(x=>$(x).onclick=()=>{fn(x);[a,b].forEach(y=>$(y).setAttribute('aria-pressed',y===x))})}
+pick('d13','d13pro',x=>scr.dataset.dev=x==='d13'?'13':'13pro');
+let tmr=null,t0=0;
+function tick(){const t=Math.floor((Date.now()-t0)/1000);$('timer').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+function setState(st){scr.dataset.state=st;clearInterval(tmr);if(st==='call'){t0=Date.now();tick();tmr=setInterval(tick,500)}
+ $('bRing').setAttribute('aria-pressed',st==='ring');$('bCall').setAttribute('aria-pressed',st==='call')}
+$('bRing').onclick=()=>setState('ring');$('bCall').onclick=()=>setState('call');
+scr.querySelector('.big .c:nth-child(2)').onclick=()=>setState('call');
+$('endc').onclick=()=>setState('ring');
+pick('mBtn','mSlide',x=>scr.dataset.mode=x==='mBtn'?'btn':'slide');
+$('inImg').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('wall').style.backgroundImage='url('+r.result+')';scr.classList.add('hasimg')};r.readAsDataURL(f)};
+$('bBlur').onclick=()=>{const on=scr.classList.toggle('noblur');$('bBlur').setAttribute('aria-pressed',!on)};
+let wl=null;
+function shoot(on){root.classList.toggle('shoot',on);fit();try{if(on&&navigator.wakeLock){navigator.wakeLock.request('screen').then(l=>wl=l).catch(()=>{})}else if(wl){wl.release();wl=null}}catch(_){}if(on){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(_){}}else if(document.fullscreenElement){document.exitFullscreen()}}
+$('bShoot').onclick=()=>shoot(true);$('exit').onclick=()=>shoot(false);
+addEventListener('keydown',e=>{if(e.key==='Escape')shoot(false)});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.classList.contains('shoot')){root.classList.remove('shoot');fit()}});
+(function(){const tr=scr.querySelector('.slider'),kn=tr.querySelector('.k'),lab=tr.querySelector('span');let x0=null,dx=0;
+const max=()=>tr.clientWidth-kn.offsetWidth-12;
+function reset(){kn.style.transform='';lab.style.opacity=1}
+kn.addEventListener('pointerdown',e=>{x0=e.clientX;dx=0;kn.setPointerCapture(e.pointerId);kn.style.transition='none'});
+kn.addEventListener('pointermove',e=>{if(x0===null)return;dx=Math.max(0,Math.min(max(),(e.clientX-x0)/K));kn.style.transform='translateX('+dx+'px)';lab.style.opacity=Math.max(0,1-dx/(max()*.55))});
+function end(){if(x0===null)return;x0=null;kn.style.transition='transform .25s ease';lab.style.transition='opacity .25s';
+if(dx>max()*.85){kn.style.transform='translateX('+max()+'px)';lab.style.opacity=0;setTimeout(()=>{setState('call');reset()},250)}else reset()}
+kn.addEventListener('pointerup',end);kn.addEventListener('pointercancel',end)})();
+let i=0;const sl=[...document.querySelectorAll('.slide')];
+function go(n){i=(n+sl.length)%sl.length;sl.forEach((s,j)=>s.classList.toggle('on',j===i));$('pg').textContent=(i+1)+' / '+sl.length;fit()}
+$('prev').onclick=()=>go(i-1);$('next').onclick=()=>go(i+1);
+fit();
+</script>
+</body>
+</html>
