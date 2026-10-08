@@ -14,7 +14,7 @@
 :root[data-theme="dark"]{--bg:#15161a;--ink:#ececf0;--mute:#9a9da8;--panel:#202228;--line:#33363f;--acc:#6b9bff}
 html,body{overscroll-behavior:none}
 body{touch-action:manipulation}
-html.shoot{background:#000;height:100%;overflow:hidden;padding:0}
+html.shoot{background:#000;position:fixed;inset:0;width:100%;height:100%;overflow:hidden;padding:0}
 html.shoot body{position:fixed;inset:0;overflow:hidden;background:#000}
 .screen{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -122,6 +122,7 @@ input[type=text]{font:inherit;font-size:14px;color:var(--ink);background:var(--p
 <label>통신<input type="text" id="inNet" value="5G"></label>
 <label>배터리(%)<input type="text" id="inBat" value="80" inputmode="numeric"></label>
 <button id="bBar" aria-pressed="true">화면 속 상태바</button>
+<label>위치 보정(pt, 촬영 모드에서 아래로)<input type="text" id="inY" value="0" inputmode="numeric"></label>
 <label class="file" style="color:var(--ink)">배경 이미지 올리기<input type="file" id="inImg" accept="image/*"></label>
 <button id="bBlur" aria-pressed="true">배경 블러</button>
 <button id="bShoot">촬영 모드</button>
@@ -153,12 +154,13 @@ input[type=text]{font:inherit;font-size:14px;color:var(--ink);background:var(--p
 <section class="slide" id="s2"><div class="ph">슬라이드 2: 다음 화면 (미정)</div></section>
 
 <script>
-const W=390,H=844;let K=1;
+const W=390,H=844;let K=1,offY=0;
+try{offY=parseFloat(localStorage.getItem('offY'))||0}catch(_){}
 const $=id=>document.getElementById(id),scr=$('scr'),root=document.body;
 function fit(){
   const shoot=root.classList.contains('shoot');
   K=shoot?Math.min($('stage').clientWidth/W,$('stage').clientHeight/H):Math.max(.35,Math.min(1,(innerWidth-40)/W,(innerHeight-250)/H));
-  $('fit').style.width=W*K+'px';$('fit').style.height=H*K+'px';$('scale').style.transform='scale('+K+')';
+  $('fit').style.transform='translateY('+(shoot?offY:0)+'px)';$('fit').style.width=W*K+'px';$('fit').style.height=H*K+'px';$('scale').style.transform='scale('+K+')';
 }
 addEventListener('resize',fit);
 function bind(id,sel){$(id).addEventListener('input',e=>scr.querySelector(sel).textContent=e.target.value)}
@@ -178,8 +180,11 @@ pick('mBtn','mSlide',x=>scr.dataset.mode=x==='mBtn'?'btn':'slide');
 $('inImg').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('wall').style.backgroundImage='url('+r.result+')';scr.classList.add('hasimg')};r.readAsDataURL(f)};
 $('bBlur').onclick=()=>{const on=scr.classList.toggle('noblur');$('bBlur').setAttribute('aria-pressed',!on)};
 let wl=null;
-function shoot(on){root.classList.toggle('shoot',on);document.documentElement.classList.toggle('shoot',on);fit();try{if(on&&navigator.wakeLock){navigator.wakeLock.request('screen').then(l=>wl=l).catch(()=>{})}else if(wl){wl.release();wl=null}}catch(_){}if(on){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(_){}}else if(document.fullscreenElement){document.exitFullscreen()}}
-$('bShoot').onclick=()=>shoot(true);$('exit').onclick=()=>shoot(false);
+function shoot(on){if(on)window.scrollTo(0,0);root.classList.toggle('shoot',on);document.documentElement.classList.toggle('shoot',on);fit();try{if(on&&navigator.wakeLock){navigator.wakeLock.request('screen').then(l=>wl=l).catch(()=>{})}else if(wl){wl.release();wl=null}}catch(_){}if(on){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}catch(_){}}else if(document.fullscreenElement){document.exitFullscreen()}}
+$('inY').value=offY;$('inY').addEventListener('input',e=>{offY=parseFloat(e.target.value)||0;try{localStorage.setItem('offY',offY)}catch(_){};fit()});
+if(window.visualViewport){visualViewport.addEventListener('resize',fit)}
+addEventListener('orientationchange',()=>setTimeout(fit,200));
+$('bShoot').onclick=()=>{shoot(true);setTimeout(fit,150)};$('exit').onclick=()=>shoot(false);
 addEventListener('keydown',e=>{if(e.key==='Escape')shoot(false)});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.classList.contains('shoot')){root.classList.remove('shoot');document.documentElement.classList.remove('shoot');fit()}});
 document.addEventListener('touchmove',e=>{if(root.classList.contains('shoot')&&!e.target.closest('.slider'))e.preventDefault()},{passive:false});
